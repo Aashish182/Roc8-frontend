@@ -33,25 +33,44 @@ const PredictSalary = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
+      const payload = {
+        experience: Number(formData.experience),
+        education: formData.education.trim(),
+        location: formData.location.trim(),
+        job_title: formData.job_title.trim(),
+        skills: formData.skills.join(",")   // ✅ FIX: array → string
+      };
+
+      console.log("Sending to API:", payload);
+
       const response = await fetch(SummaryApi.salaryDetails.url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
       });
 
+      const result = await response.json();
+
+      console.log("API Response:", result);
+
       if (response.ok) {
-        const result = await response.json();
         setPredictedSalary(result.predicted_salary);
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 8000);
       } else {
-        console.error('Failed to predict salary');
+        console.error("Prediction Failed:", result.error);
+        alert(result.error || "Salary prediction failed");
       }
     } catch (error) {
-      console.error('Error predicting salary:', error);
+      console.error("Error predicting salary:", error);
+      alert("Server error while predicting salary");
     }
   };
+
 
   const jobTitles = ['Software Engineer', 'Data Scientist', 'DevOps Engineer', 'Full Stack Developer', 'Marketing Manager', 'Frontend Developer'];
   const locations = ['Pune', 'Hyderabad', 'Delhi', 'Mumbai', 'Bangalore', 'Chennai'];
